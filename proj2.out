@@ -21,18 +21,18 @@
 21: Elf 1: get help
 22: Elf 2: get help
 23: Elf 3: get help
-24: Elf 2: need help
-25: Elf 1: need help
+24: Elf 1: need help
+25: Elf 2: need help
 26: Santa: going to sleep
 27: Santa: closing workshop
 28: Elf 3: need help
-29: Elf 3: taking holidays
+29: RD 3: get hitched
 30: Elf 5: taking holidays
-31: Elf 2: taking holidays
-32: Elf 1: taking holidays
+31: Elf 1: taking holidays
+32: Elf 2: taking holidays
 33: RD 1: get hitched
 34: RD 2: get hitched
-35: RD 3: get hitched
+35: Elf 4: taking holidays
 36: RD 4: get hitched
-37: Elf 4: taking holidays
+37: Elf 3: taking holidays
 38: Santa: Christmas started
