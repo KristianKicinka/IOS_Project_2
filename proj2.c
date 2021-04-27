@@ -1,3 +1,9 @@
+/**
+ * Projekt 2 - (Synchronizace) Santa Claus problem
+ * Predmet IOS 2020/21
+ * @author Kristián Kičinka
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -652,7 +658,7 @@ void reindeer_process(int id, program_parameters_t *program_parameters){
 
     reindeer_output_text(REINDEER_HOME,id);
     sem_wait(memory_semaphore);
-    (*active_reindeer_counter)++;
+    (*active_reindeer_counter)+=1;
 
     if((*active_reindeer_counter) == program_parameters->reindeers_count)
         sem_post(santa_semaphore);
@@ -661,7 +667,7 @@ void reindeer_process(int id, program_parameters_t *program_parameters){
     sem_wait(reindeer_semaphore);
 
     reindeer_output_text(REINDEER_GET,id);
-    (*active_reindeer_counter)--;
+    (*active_reindeer_counter)-=1;
     if((*active_reindeer_counter) == 0)
         sem_post(christmas_semaphore);
     
