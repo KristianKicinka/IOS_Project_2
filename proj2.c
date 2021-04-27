@@ -51,17 +51,17 @@ typedef enum {
     REINDEER_GET
 }reindeer_texts;
 
-// Output file
+// OUTPUT FILE
 FILE *out_file;
 
-// Shared memory declaration
+// SHARED MEMORY DECLARATION
 int *workshop_elf_counter;
 int *active_reindeer_counter;
 bool *workshop_state;
 int *task_counter;
 int *remaining_elves;
 
-// Semaphores declaration
+// SEMAPHORES DECLARATION
 sem_t *santa_semaphore = NULL;
 sem_t *reindeer_semaphore = NULL;
 sem_t *elf_semaphore = NULL;
@@ -70,7 +70,7 @@ sem_t *christmas_semaphore = NULL;
 sem_t *writing_semaphore = NULL;
 sem_t *memory_semaphore = NULL;
 
-// Program parameters structure
+// PROGRAM PARAMETERS STRUCTURE
 typedef struct prog_params{
     int elfs_count;
     int reindeers_count;
@@ -78,6 +78,7 @@ typedef struct prog_params{
     int max_holiday_time;
 }program_parameters_t;
 
+// Functions declaration
 void init_program_parameters(program_parameters_t *program_parameters);
 int max_duration(int duration);
 void error_message(error_type error);
@@ -160,6 +161,90 @@ int main( int argc, char *argv[] ) {
     return 0;
 }
 
+/*!
+ * @name    init_program_parameters
+ * 
+ * @brief    This function initialize all program parameters.
+ *             
+ * @param    program_parameters    The structure that represent all parameters inserted to program.
+ * 
+*/
+void init_program_parameters(program_parameters_t *program_parameters){
+    program_parameters->elfs_count = 0;
+    program_parameters->reindeers_count = 0;
+    program_parameters->max_working_time = 0;
+    program_parameters->max_holiday_time = 0;
+}
+
+/*!
+ * @name    prepare_values
+ * 
+ * @brief    This function cast to integer values from input and prepare it for using.
+ *             
+ * @param       argc    Count of input parameters.
+ * @param       argv[]    Array of input parameters.
+ * @param       program_parameters    The structure that represent all parameters inserted to program.
+ * 
+*/
+bool prepare_values(int argc, char *argv[], program_parameters_t *program_parameters){
+    int err_count = 0;
+    char *tmp;
+    if(argc < 5){
+        return true;
+    }
+    int param_01 = strtol(argv[1],&tmp,BASE);
+    if(*tmp =='\0' && param_01 > 0 && param_01 < 1000 ){
+        program_parameters->elfs_count = param_01;
+        err_count ++;
+    }
+    int param_02 = strtol(argv[2],&tmp,BASE);
+    if (*tmp =='\0' && param_02 > 0 && param_02 < 20) {
+        program_parameters->reindeers_count = param_02;
+        err_count ++;
+    }
+    int param_03 = strtol(argv[3],&tmp,BASE);
+    if (*tmp =='\0' && param_03 >= 0 && param_03 <= 1000){
+        program_parameters->max_working_time = param_03;
+        err_count ++;
+    }
+    int param_04 = strtol(argv[4],&tmp,BASE);    
+    if(*tmp =='\0' && param_04 >= 0 && param_04 <= 1000){
+        program_parameters->max_holiday_time = param_04;
+        err_count ++;
+    }
+    if (err_count != 4)
+        return true;
+    
+   return false;
+}
+
+/*!
+ * @name    max_duration
+ * 
+ * @brief    This function calculate work time for elves reindeers from range.
+ *             
+ * @param       duration    Max work time from program input.
+ * 
+ * @return      random work time in range.
+*/
+int max_duration(int duration){
+    if(duration != 0){
+        srand(time(NULL));
+        return (rand() % duration);
+    }
+    return 0;
+}
+
+
+/*!
+ * @name    initialize_semaphores
+ * 
+ * @brief    This function initialize all semaphores.
+ * 
+ * @details     The function initialize all semaphores and process errors 
+ *              in creating semaphores.
+ * 
+*/
 void initialize_semaphores(){
     bool error = false;
 
@@ -202,6 +287,15 @@ void initialize_semaphores(){
     }    
 }
 
+/*!
+ * @name    uninitialize_semaphores
+ * 
+ * @brief    This function uninitialize all semaphores.
+ * 
+ * @details     The function uninitialize all semaphores and process errors 
+ *              in destroying semaphores.
+ * 
+*/
 void uninitialize_semaphores(){
     bool error = false;
     if((sem_destroy(santa_semaphore)) == -1)
@@ -234,6 +328,15 @@ void uninitialize_semaphores(){
     }
 }
 
+/*!
+ * @name    initialize_memory
+ * 
+ * @brief    This function initialize all shared memories.
+ * 
+ * @details     The function initialize all shared memories and process errors 
+ *              in creating shared memories.
+ * 
+*/
 void initialize_memory(){
     bool error = false;
 
@@ -256,6 +359,15 @@ void initialize_memory(){
 
 }
 
+/*!
+ * @name    uninitialize_memory
+ * 
+ * @brief    This function uninitialize all shared memories.
+ * 
+ * @details     The function uninitialize all shared memories and process errors 
+ *              in destroying shared memories.
+ * 
+*/
 void uninitialize_memory(){
 
    munmap(workshop_elf_counter,sizeof(int));
@@ -266,6 +378,17 @@ void uninitialize_memory(){
 
 }
 
+/*!
+ * @name    santa_output_text
+ * 
+ * @brief    This function send santa message to output file.
+ * 
+ * @details     The function choose right santa message by the enum value
+ *              and will send it to the output file.
+ *            
+ * @param       text    The enum value thaht represent needed message.
+ * 
+*/
 void santa_output_text(santa_texts text){
   
     sem_wait(writing_semaphore);
@@ -292,6 +415,19 @@ void santa_output_text(santa_texts text){
     
 }
 
+
+/*!
+ * @name    elf_output_text
+ * 
+ * @brief    This function send elf message to output file.
+ * 
+ * @details     The function choose right elf message by the enum value
+ *              and will send it to the output file.
+ *            
+ * @param       text    The enum value thaht represent needed message.
+ * @param       elf_id    Id of current elf to process.
+ * 
+*/
 void elf_output_text(elf_texts text, int elf_id){
     sem_wait(writing_semaphore);
         *(task_counter)+=1;
@@ -316,6 +452,18 @@ void elf_output_text(elf_texts text, int elf_id){
     sem_post(writing_semaphore);
 }
 
+/*!
+ * @name    reindeer_output_text
+ * 
+ * @brief    This function send reindeer message to output file.
+ * 
+ * @details     The function choose right reindeer message by the enum value
+ *              and will send it to the output file.
+ *            
+ * @param       text    The enum value thaht represent needed message.
+ * @param       reindeer_id    Id of current reindeer to process.
+ * 
+*/
 void reindeer_output_text(reindeer_texts text, int reindeer_id){
      sem_wait(writing_semaphore);
         *(task_counter)+=1;
@@ -336,6 +484,54 @@ void reindeer_output_text(reindeer_texts text, int reindeer_id){
     sem_post(writing_semaphore);
 }
 
+
+/*!
+ * @name    error_message
+ * 
+ * @brief    This function send error message to output file.
+ * 
+ * @details     The function choose right error message by the enum value
+ *              and will send it to the output file.
+ *            
+ * @param       error    The enum value thaht represent needed error message.
+ * 
+ * 
+*/
+void error_message(error_type error){
+    switch (error){
+        case PARAM_ERROR :
+            fprintf(stderr, "Parameters loading error !!\n");
+            exit(1);
+            break;
+        case FILE_ERROR : 
+            fprintf(stderr, "Error with opening proj2.out file !!\n");
+            exit(1);
+            break;
+        case PROC_ERROR : 
+            fprintf(stderr, "Create process error !!\n");
+            exit(1);
+            break;
+        default :
+            fprintf(stderr, "Unexpected error !!\n");
+            exit(1);
+            break;
+    }
+}
+
+/*!
+ * @name    santa_process
+ * 
+ * @brief    This function represent santa process.
+ * 
+ * @details     When the santa start, function send message to output.
+ *              After that santa will help elves if their need it.
+ *              If all reindeers come home from holiday, santa will close workshop
+ *              and will go hitch the reindeers. When all reindeers are hitched, Christmas can start.
+ *            
+ * @param       program_parameters    The structure that represent all parameters inserted to program.
+ * 
+ * 
+*/
 void santa_process(program_parameters_t *program_parameters){
     
     while (true){
@@ -374,6 +570,21 @@ void santa_process(program_parameters_t *program_parameters){
     exit(0);
 }
 
+
+/*!
+ * @name    elf_process
+ * 
+ * @brief    This function represent elf process.
+ * 
+ * @details     When the elf start, function send message to output.
+ *              After that elf will need help from santa. 
+ *              Elf will go to queue and if there are 3 of elves, last elf wake up santa.
+ *              When worksop is closed elves can go to holiday.
+ *             
+ * @param       program_parameters    The structure that represent all parameters inserted to program.
+ * @param       id       Id of current elf to process.
+ * 
+*/
 void elf_process(int id ,program_parameters_t *program_parameters){
     
     elf_output_text(ELF_START,id);
@@ -420,6 +631,20 @@ void elf_process(int id ,program_parameters_t *program_parameters){
     exit(0);
 }
 
+/*!
+ * @name    reindeer_process
+ * 
+ * @brief    This function represent reindeer process.
+ * 
+ * @details     When the reindeer start, function send message to output.
+ *              If the reindeer come home from holiday, is waiting to santa.
+ *              When all reindeers comes home, last reindeer wake up santa. 
+ *              After that santa will start hitch thems.
+ *             
+ * @param       program_parameters    The structure that represent all parameters inserted to program.
+ * @param       id       Id of current reindeer to process.
+ * 
+*/
 void reindeer_process(int id, program_parameters_t *program_parameters){
 
     reindeer_output_text(REINDEER_RST,id);
@@ -441,74 +666,5 @@ void reindeer_process(int id, program_parameters_t *program_parameters){
         sem_post(christmas_semaphore);
     
     exit(0);
-}
-
-
-void init_program_parameters(program_parameters_t *program_parameters){
-    program_parameters->elfs_count = 0;
-    program_parameters->reindeers_count = 0;
-    program_parameters->max_working_time = 0;
-    program_parameters->max_holiday_time = 0;
-}
-
-void error_message(error_type error){
-    switch (error){
-        case PARAM_ERROR :
-            fprintf(stderr, "Parameters loading error !!\n");
-            exit(1);
-            break;
-        case FILE_ERROR : 
-            fprintf(stderr, "Error with opening proj2.out file !!\n");
-            exit(1);
-            break;
-        case PROC_ERROR : 
-            fprintf(stderr, "Create process error !!\n");
-            exit(1);
-            break;
-        default :
-            fprintf(stderr, "Unexpected error !!\n");
-            exit(1);
-            break;
-    }
-}
-
-int max_duration(int duration){
-    if(duration != 0){
-        srand(time(NULL));
-        return (rand() % duration);
-    }
-    return 0;
-}
-
-bool prepare_values(int argc, char *argv[], program_parameters_t *program_parameters){
-    int err_count = 0;
-    char *tmp;
-    if(argc < 5){
-        return true;
-    }
-    int param_01 = strtol(argv[1],&tmp,BASE);
-    if(*tmp =='\0' && param_01 > 0 && param_01 < 1000 ){
-        program_parameters->elfs_count = param_01;
-        err_count ++;
-    }
-    int param_02 = strtol(argv[2],&tmp,BASE);
-    if (*tmp =='\0' && param_02 > 0 && param_02 < 20) {
-        program_parameters->reindeers_count = param_02;
-        err_count ++;
-    }
-    int param_03 = strtol(argv[3],&tmp,BASE);
-    if (*tmp =='\0' && param_03 >= 0 && param_03 <= 1000){
-        program_parameters->max_working_time = param_03;
-        err_count ++;
-    }
-    int param_04 = strtol(argv[4],&tmp,BASE);    
-    if(*tmp =='\0' && param_04 >= 0 && param_04 <= 1000){
-        program_parameters->max_holiday_time = param_04;
-        err_count ++;
-    }
-    if (err_count != 4)
-        return true;
-    
-   return false;
 }
 
