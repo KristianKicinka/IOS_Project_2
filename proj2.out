@@ -1,38 +1,38 @@
 1: Santa: going to sleep
-2: Elf 1: started
+2: RD 3: rstarted
 3: Elf 2: started
 4: Elf 3: started
 5: Elf 4: started
 6: Elf 5: started
 7: RD 1: rstarted
 8: RD 2: rstarted
-9: RD 3: rstarted
+9: Elf 1: started
 10: RD 4: rstarted
-11: Elf 1: need help
+11: RD 3: return home
 12: Elf 2: need help
 13: Elf 3: need help
 14: Elf 4: need help
 15: Elf 5: need help
 16: RD 1: return home
 17: RD 2: return home
-18: RD 3: return home
+18: Elf 1: need help
 19: RD 4: return home
 20: Santa: helping elves
-21: Elf 1: get help
-22: Elf 2: get help
-23: Elf 3: get help
-24: Elf 1: need help
-25: Elf 2: need help
+21: Elf 2: get help
+22: Elf 3: get help
+23: Elf 4: get help
+24: Elf 2: need help
+25: Elf 3: need help
 26: Santa: going to sleep
 27: Santa: closing workshop
-28: Elf 3: need help
-29: Elf 3: taking holidays
-30: Elf 5: taking holidays
-31: Elf 1: taking holidays
-32: Elf 2: taking holidays
-33: RD 1: get hitched
+28: Elf 4: need help
+29: Elf 4: taking holidays
+30: Elf 1: taking holidays
+31: Elf 2: taking holidays
+32: Elf 3: taking holidays
+33: RD 3: get hitched
 34: RD 2: get hitched
-35: RD 3: get hitched
-36: RD 4: get hitched
-37: Elf 4: taking holidays
+35: RD 4: get hitched
+36: RD 1: get hitched
+37: Elf 5: taking holidays
 38: Santa: Christmas started

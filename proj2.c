@@ -98,8 +98,8 @@ void reindeer_output_text(reindeer_texts text, int reindeer_id);
 void santa_process(program_parameters_t *program_parameters);
 void elf_process(int id ,program_parameters_t *program_parameters);
 void reindeer_process(int id, program_parameters_t *program_parameters);
-
 bool prepare_values(int argc, char *argv[], program_parameters_t *program_parameters);
+
 
 int main( int argc, char *argv[] ) {
     program_parameters_t program_parameters;
