@@ -66,6 +66,7 @@ int *active_reindeer_counter;
 bool *workshop_state;
 int *task_counter;
 int *remaining_elves;
+unsigned *time_seed;
 
 // SEMAPHORES DECLARATION
 sem_t *santa_semaphore = NULL;
@@ -86,7 +87,8 @@ typedef struct prog_params{
 
 // Functions declaration
 void init_program_parameters(program_parameters_t *program_parameters);
-int max_duration(int duration);
+int max_duration_elf(int duration);
+int max_duration_reindeer(int duration);
 void error_message(error_type error);
 void initialize_semaphores();
 void initialize_memory();
@@ -120,6 +122,7 @@ int main( int argc, char *argv[] ) {
     (*active_reindeer_counter) = 0;
     (*workshop_state) = true; // false = closed ; true = open
     (*task_counter) = 0;
+    (*time_seed) = time(NULL);
     
     // Creating needed processes
     int sum = program_parameters.elfs_count + program_parameters.reindeers_count;
@@ -225,22 +228,37 @@ bool prepare_values(int argc, char *argv[], program_parameters_t *program_parame
 }
 
 /*!
- * @name    max_duration
+ * @name    max_duration_elf
  * 
- * @brief    This function calculate work time for elves reindeers from range.
+ * @brief    This function calculate work time for elves from range.
  *             
  * @param       duration    Max work time from program input.
  * 
  * @return      random work time in range.
 */
-int max_duration(int duration){
+int max_duration_elf(int duration){
     if(duration != 0){
-        srand(time(NULL));
-        return (rand() % duration);
+        return (rand_r(time_seed) % (duration*1000));
     }
     return 0;
 }
 
+
+/*!
+ * @name    max_duration_reindeer
+ * 
+ * @brief    This function calculate work time for reindeers from range.
+ *             
+ * @param       duration    Max work time from program input.
+ * 
+ * @return      random work time in range.
+*/
+int max_duration_reindeer(int duration){
+    if(duration != 0){
+        return ((( rand_r(time_seed) % (duration*1000) )/2 ) + ((duration*1000)/2));
+    }
+    return 0;
+}
 
 /*!
  * @name    initialize_semaphores
@@ -356,6 +374,8 @@ void initialize_memory(){
         error = true;
     if ((remaining_elves = mmap(NULL, sizeof(int), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, 0, 0)) == MAP_FAILED)
         error = true;
+    if ((time_seed = mmap(NULL, sizeof(unsigned), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, 0, 0)) == MAP_FAILED)
+        error = true;   
 
     if(error == true){
         uninitialize_memory();
@@ -381,6 +401,7 @@ void uninitialize_memory(){
    munmap(workshop_state,sizeof(bool));
    munmap(task_counter,sizeof(int));
    munmap(remaining_elves,sizeof(int));
+   munmap(time_seed,sizeof(unsigned));
 
 }
 
@@ -554,7 +575,7 @@ void santa_process(program_parameters_t *program_parameters){
             sem_post(memory_semaphore);
             break;
 
-        }else if( (*workshop_elf_counter) == 3 && (*workshop_state) == true){
+        }else if((*workshop_state) == true){
             santa_output_text(SANTA_HELPING);
             (*remaining_elves) = 3;
             for (int i = 0; i < 3; i++)
@@ -597,7 +618,7 @@ void elf_process(int id ,program_parameters_t *program_parameters){
 
     while (true){
 
-        usleep(max_duration(program_parameters->max_working_time));
+        usleep(max_duration_elf(program_parameters->max_working_time));
         
         elf_output_text(ELF_NEED_HELP,id);
 
@@ -654,7 +675,7 @@ void elf_process(int id ,program_parameters_t *program_parameters){
 void reindeer_process(int id, program_parameters_t *program_parameters){
 
     reindeer_output_text(REINDEER_RST,id);
-    usleep(max_duration(program_parameters->max_holiday_time/2));
+    usleep(max_duration_reindeer(program_parameters->max_holiday_time));
 
     reindeer_output_text(REINDEER_HOME,id);
     sem_wait(memory_semaphore);
